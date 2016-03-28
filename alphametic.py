@@ -1,4 +1,7 @@
+import itertools
+
 ALLOW_FIRST_0 = False
+BRUTE_FORCE = False
 
 def alphametic(lhs, rhs, carry, res, save, numbers):
     expr = [lhs, rhs, res]
@@ -90,6 +93,31 @@ def alphametic(lhs, rhs, carry, res, save, numbers):
             save = tsave.copy()
         return False, save
 
+def alphametic_brute(lhs, rhs, res):
+    var = list(set(list(lhs + rhs + res)))
+    for p in itertools.permutations([1, 2, 3, 4, 5, 6, 7, 8, 9, 0], len(var)):
+        save = {}
+        for i in range(len(var)):
+            save[var[i]] = p[i]
+        if not ALLOW_FIRST_0:
+            if save[lhs[0]] == 0:
+                continue
+            if save[rhs[0]] == 0:
+                continue
+            if save[res[0]] == 0:
+                continue
+        tlhs = lhs
+        trhs = rhs
+        tres = res
+        for k in save:
+            tlhs = tlhs.replace(k, str(save[k]))
+            trhs = trhs.replace(k, str(save[k]))
+            tres = tres.replace(k, str(save[k]))
+        if int(tlhs) + int(trhs) == int(tres):
+            save['*'] = 0
+            return True, save
+    return (False, )
+
 def solve_alphametic(expr):
     texpr = expr
     expr = expr.split('=')
@@ -103,7 +131,10 @@ def solve_alphametic(expr):
     res = expr[1].strip()
     save = {'*': 0}
     numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    ret = alphametic(lhs[::-1], rhs[::-1], 0, res[::-1], save, numbers)
+    if BRUTE_FORCE:
+        ret = alphametic_brute(lhs, rhs, res)
+    else:
+        ret = alphametic(lhs[::-1], rhs[::-1], 0, res[::-1], save, numbers)
     if ret[0]:
         ret[1].pop('*')
         for k in ret[1]:
@@ -114,4 +145,5 @@ def solve_alphametic(expr):
 
 
 if __name__ == '__main__':
+    BRUTE_FORCE = True
     print solve_alphametic('SINCE+JULIUS=CAESAR')
