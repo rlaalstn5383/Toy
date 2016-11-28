@@ -25,7 +25,7 @@ function register(courseName, prof) {
     console.log("##########################");
     console.log("found " + a.length + " class");
     $.each(tr, function(index, value) {
-        console.log("# " + index + ": " $(value).children().eq(5).text());
+        console.log("# " + index + ": " + $(value).children().eq(5).text());
     })
 
     console.log("call the return function with index");
@@ -33,7 +33,7 @@ function register(courseName, prof) {
     function ret(index) {
         $.each(tr, function(i, value) {
             if (index == i) {
-                var a = value.find("a[name = 'saveCourse']");
+                var a = $(value).find("a[name = 'saveCourse']");
                 setInterval(function() { a.click();}, 1000);
                 console.log("macro works!");
                 console.log("# " + $(value).children().eq(6).text() + " " + $(value).children().eq(5).text());
