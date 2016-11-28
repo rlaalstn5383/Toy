@@ -25,7 +25,7 @@ function register(courseName, prof) {
     console.log("##########################");
     console.log("found " + a.length + " class");
     $.each(tr, function(index, value) {
-        console.log("# " + index + ": " + $(value).children().eq(5).text());
+        console.log("# " + index + ": " + $(value).children().eq(6).text() + $(value).children().eq(5).text());
     })
 
     console.log("call the return function with index");
