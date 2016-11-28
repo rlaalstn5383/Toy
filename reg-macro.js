@@ -1,10 +1,10 @@
 // USAGE
-// c = register(과목이름, 분반) -> 분반 안 넣어도 됨
+// c = register(과목이름, 교수님) -> 교수님 안 넣어도 됨
 // 콘솔에 정보 출력
 // 실행을 원할 경우->  c()
 // 다시 검색을 하고 싶을 경우-> c = register(...)
 
-function register(courseName, lectureClass) {
+function register(courseName, prof) {
     if (typeof jQuery == 'undefined') {
         var script = document.createElement('script');
         script.type = "text/javascript";
@@ -14,13 +14,13 @@ function register(courseName, lectureClass) {
     if (!(typeof courseName == 'string')) {
         courseName = '';
     }
-    if (!(typeof lectureClass == 'string')) {
-        lectureClass = '';
+    if (!(typeof prof == 'string')) {
+        prof = '';
     }
     var nameSel = "tr:contains('" + courseName + "')";
-    var classSel = ":contains('" + lectureClss + "')";
-    var a = $("table#listTable").find(nameSel).filter(classSel).find("a");
+    var profSel = ":contains('" + prof + "')";
+    var a = $("table#listTable").find(nameSel).filter(profSel).find("a");
 
-    console.log("found " + tr.length + " class");
+    console.log("found " + a.length + " class");
     return function() { setInterval(function() { a.click(); }, 1000); };
 }
