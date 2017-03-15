@@ -30,7 +30,7 @@ class Polynomial:
 		for index in range(len(self._expr_list)):
 			if self._expr_list[index] != 0:
 				_str_list.append("%dx**%d" %(self._expr_list[index], index))
-		return "+".join(_str_list)
+		return " + ".join(_str_list)
 
 	def __len__(self):
 		return len(self._expr_list)
@@ -43,6 +43,9 @@ class Polynomial:
 
 	def __sub__(self, rhs):
 		return self.sub(rhs)
+
+	def __mul__(self, rhs):
+		return self.mul(rhs)
 
 	def add(self, rhs):
 		assert isinstance(rhs, Polynomial)
@@ -69,8 +72,25 @@ class Polynomial:
 
 		return self.add(rhs.negate())
 
+	def mul_x(self):
+		return Polynomial([0] + self._expr_list[:])
+
+	def mul_number(self, n):
+		return Polynomial(list(map(lambda x: n * x, self._expr_list[:])))
+
+	def mul(self, rhs):
+		ret = Polynomial([])
+		cur = self.mul_number(1)
+
+		for i in rhs._expr_list:
+			ret += cur.mul_number(i)
+			cur = cur.mul_x()
+
+		return ret
+
 if __name__ == "__main__":
 	lhs = Polynomial("(1,1),(3,5),(4,2)")
 	rhs = Polynomial("(2,0),(3,2)")
 	print "%s + %s = %s" %(lhs, rhs, lhs + rhs)
 	print "%s - %s = %s" %(lhs, rhs, lhs - rhs)
+	print "%s * %s = %s" %(lhs, rhs, lhs * rhs)
