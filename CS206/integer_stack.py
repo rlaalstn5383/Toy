@@ -24,6 +24,7 @@ class Stack(object):
 
 class IntegerStack(Stack):
     def __init__(self):
+        self.__stack = Stack()
         super(IntegerStack, self).__init__()
 
     def push(self, num):
@@ -76,13 +77,88 @@ class IntegerEntry(OneEntry):
     def value(self):
         return self.__value
 
+def evaluate(eval_string):
+    numstack = IntegerStack()
+    opstack = IntegerStack()
+
+    ADD = 1000001
+    SUB = 1000002
+    MUL = 1000003
+    DIV = 1000004
+    LEFT = 1000005
+    RIGHT = 1000006
+
+    def is_op(cur):
+        curop = eval_string[cur]
+        return curop == '+' or curop == '-' or curop == '*' or curop == '/' or curop == '(' or curop == ')'
+
+    def is_right(cur):
+        return eval_string[cur] == ')'
+
+    def is_left(cur):
+        return eval_string[cur] == '('
+
+    def read_number(cur):
+        ret = 0
+        curr = cur
+        if is_left(curr):
+            return read_clause(curr)
+        while not is_op(curr):
+            ret *= 10
+            ret += int(eval_string[curr])
+            curr += 1
+        numstack.push(ret)
+        return curr
+
+    def read_clause(cur):
+        curr = cur
+        numstack.push(LEFT)
+        while not is_right(curr):
+            curr += 1
+            curr = read_number(curr)
+            if eval_string[curr] == '+':
+                opstack.push(ADD)
+            elif eval_string[curr] == '-':
+                opstack.push(SUB)
+            elif eval_string[curr] == '*':
+                curr = read_number(curr + 1)
+                numstack.push(numstack.pop() * numstack.pop())
+            elif eval_string[curr] == '/':
+                curr = read_number(curr + 1)
+                numstack.push(1 / numstack.pop() * numstack.pop())
+
+        ret = numstack.pop()
+        cur_number = numstack.pop()
+        while not cur_number == LEFT:
+            cur_op = opstack.pop()
+            if cur_op == ADD:
+                ret += cur_number
+            elif cur_op == SUB:
+                ret -= cur_number
+            else:
+                raise ValueError
+            cur_number = numstack.pop()
+
+        numstack.push(ret)
+
+        curr += 1
+        return curr
+
+    eval_string = '(%s)' %eval_string
+    read_number(0)
+
+    return numstack.pop()
+
+
+
+
+
+
 
 if __name__ == '__main__':
-    st = IntegerStack()
-    st.push(1)
-    st.push(2)
-    st.push(3)
+    st1 = '1+2'
+    st2 = '1+(2+3)'
+    st3 = '1*(1+2/3)'
 
-    print st.pop()
-    print st.pop()
-    print st.pop()
+    for st in (st1, st2, st3):
+        print '%s = %d (%d)' %(st, evaluate(st), eval(st))
