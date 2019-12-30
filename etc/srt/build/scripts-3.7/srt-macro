@@ -1,3 +1,4 @@
+#!python
 import argparse
 import sys
 import time
@@ -5,7 +6,7 @@ from datetime import datetime
 from getpass import getpass
 from random import randint
 
-from SRTpy import Srt
+from srt_macro.SRTpy import Srt, SrtError
 from heconvert.converter import h2e
 
 parser = argparse.ArgumentParser()
@@ -14,7 +15,8 @@ parser.add_argument('--password', type=str)
 parser.add_argument('--dpt', type=str, required=True)
 parser.add_argument('--arv', type=str, required=True)
 parser.add_argument('--date', type=lambda d: datetime.strptime(d, '%Y%m%d').strftime('%Y%m%d'))
-parser.add_argument('--hour', type=lambda h: datetime.strptime(h, '%H').strftime('%H0000'))
+parser.add_argument('--from_hour', type=lambda h: datetime.strptime(h, '%H').strftime('%H0000'))
+parser.add_argument('--to_hour', type=lambda h: datetime.strptime(h, '%H').strftime('%H0000'))
 
 args = parser.parse_args()
 
@@ -23,14 +25,29 @@ password = args.password if args.password else getpass('password: ')
 dpt = args.dpt
 arv = args.arv
 date = args.date
-hour = args.hour
+from_hour = args.from_hour
+to_hour = args.to_hour
 
 srt = Srt(id, password)
 while True:
-    print('검색: %s %s %s %s' % (dpt, arv, date, hour))
-    trains = srt.search(h2e(dpt), h2e(arv), date, hour, include_no_seat=True)
+    print('검색: %s %s %s %s' % (dpt, arv, date, from_hour))
+    trains = []
+    for _ in range(10):
+        try:
+            trains = srt.search(h2e(dpt), h2e(arv), date, from_hour, include_no_seat=True)
+            break
+        except SrtError as e:
+            if '사용자가 많아 접속이 원활하지 않습니다' in e.message:
+                continue
+            raise
+    else:
+        raise Exception
+
     print('\t' + '\n\t'.join(map(str, trains)))
-    for train in (train for train in trains if train.has_general_seat()):
+    for train in (
+            train for train in trains
+            if train.has_general_seat() and train.dep_time <= to_hour
+    ):
         try:
             srt.reserve(train)
             print('예약완료: %s' % train)
@@ -38,4 +55,3 @@ while True:
             print('예약실패: %s' % e)
     sys.stdout.flush()
     time.sleep(randint(5, 15))
-
