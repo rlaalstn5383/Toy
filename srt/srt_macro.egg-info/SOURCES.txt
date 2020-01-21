@@ -1,0 +1,9 @@
+MANIFEST.in
+setup.py
+bin/srt-macro
+srt_macro.egg-info/PKG-INFO
+srt_macro.egg-info/SOURCES.txt
+srt_macro.egg-info/dependency_links.txt
+srt_macro.egg-info/not-zip-safe
+srt_macro.egg-info/requires.txt
+srt_macro.egg-info/top_level.txt

@@ -11,7 +11,7 @@ setup(
     zip_safe=False,
     scripts=['bin/srt-macro'],
     install_requires=[
-        'heconvert',
         'requests',
+        'SRTrain',
     ],
 )

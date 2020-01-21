@@ -1,13 +1,14 @@
-#!python3
+#!python
 import argparse
 import sys
 import time
 from datetime import datetime
 from getpass import getpass
 from random import randint
+from typing import List
 
-from srt_macro.SRTpy import Srt, SrtError
-from heconvert.converter import h2e
+from SRT import SRT, SRTError
+from SRT.train import SRTTrain
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--id', type=lambda s: str(int(s)), required=True)
@@ -28,26 +29,28 @@ date = args.date
 from_hour = args.from_hour
 to_hour = args.to_hour
 
-srt = Srt(id, password)
+srt = SRT(id, password)
 while True:
     print('검색: %s %s %s %s' % (dpt, arv, date, from_hour))
-    trains = []
+    trains: List[SRTTrain] = []
+
     for _ in range(10):
         try:
-            trains = srt.search(h2e(dpt), h2e(arv), date, from_hour, include_no_seat=True)
+            trains = srt.search_train(dpt, arv, date, from_hour, False)
             break
-        except SrtError as e:
-            if '사용자가 많아 접속이 원활하지 않습니다' in e.message:
+        except SRTError as e:
+            if '사용자가 많아 접속이 원활하지 않습니다' in e.msg:
                 continue
             raise
     else:
         raise Exception
 
+    trains = [train for train in trains if train.dep_time <= to_hour]
+
     print('\t' + '\n\t'.join(map(str, trains)))
-    for train in (
-            train for train in trains
-            if train.has_general_seat() and train.dep_time <= to_hour
-    ):
+    for train in trains:
+        if not train.general_seat_available():
+            continue
         try:
             srt.reserve(train)
             print('예약완료: %s' % train)
